@@ -5,6 +5,6 @@
         "target": "es6"
     },
     "files": [
-        "src/public/js/main.ts"
+        "src/index.ts"
     ]
 }
