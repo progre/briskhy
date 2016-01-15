@@ -9,7 +9,10 @@
       "name": "brisky"
     },
     "message": {
-      "sprintStart": "%s start",
+      "opened": "new ticket [%s] %s",
+      "resolved": "%s's %s is resolved",
+      "closed": "%s's %s is closed",
+      "sprintStarted": "%s started",
       "sprintClosed": "%s closed"
     }
   },

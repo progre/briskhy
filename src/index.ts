@@ -39,7 +39,10 @@ async function main() {
                         if (name === "-1") {
                             name = "all";
                         }
-                        irc.post(`${name} さんの ${ticket.title} が解決しました。`);
+                        let message = process.env.npm_package_config_message_resolved;
+                        if (!!message) {
+                            irc.post(format(message, name, ticket.title));
+                        }
                     });
             });
         list.filter(ticket => ticket.categoryTerm === "closed")
@@ -50,16 +53,22 @@ async function main() {
                         if (name === "-1") {
                             name = "all";
                         }
-                        irc.post(`${name} さんの ${ticket.title} が閉じました。`);
+                        let message = process.env.npm_package_config_message_closed;
+                        if (!!message) {
+                            irc.post(format(message, name, ticket.title));
+                        }
                     });
             });
         list.filter(ticket => ticket.categoryTerm === "reopened")
             .forEach(ticket => {
-                irc.post(`${ticket.title} は開き直されました。`);
+                let message = process.env.npm_package_config_message_reopened;
+                if (!!message) {
+                    irc.post(format(message, ticket.title));
+                }
             });
     });
     watcher.on("sprintstart", (name: string) => {
-        irc.post(format(process.env.npm_package_config_message_sprintStart, name));
+        irc.post(format(process.env.npm_package_config_message_sprintStarted, name));
     });
     watcher.on("sprintclose", (name: string) => {
         irc.post(format(process.env.npm_package_config_message_sprintClosed, name));
@@ -71,7 +80,11 @@ function notifyCreatedTicket(irc: IrcClient, ticket: Ticket) {
         .then(info => {
             let numLinks = info.links.length;
             let inSprint = info.sprint;
-            let message = "新しいチケット: 【" + ticket.title + "】" + ticket.summary;
+            let messageTemplate = process.env.npm_package_config_message_opened;
+            if (!messageTemplate) {
+                return;
+            }
+            let message = format(messageTemplate, ticket.title, ticket.summary);
             if (info.parent.length > 0) {
                 message += " (" + info.parent + "のサブチケット)";
             } else {
