@@ -2,20 +2,17 @@ import * as events from "events";
 import * as jirautils from "./jirautils";
 
 export default class JiraWatcher extends events.EventEmitter {
-    private lastUpdated: string = null;
     private currentSprintState: string = null;
 
-    constructor() {
+    static async new() {
+        let rss = await jirautils.getRss(1);
+        let result = await jirautils.parseFeed(rss);
+        return new this(result[0].updated);
+    }
+
+    constructor(private lastUpdated: string) {
         super();
-        jirautils.getRss(1)
-            .then(jirautils.parseFeed)
-            .then(result => {
-                this.lastUpdated = result[0].updated;
-                setInterval(() => this.doWatching(), 60 * 1000);
-            })
-            .catch(e => {
-                console.error(e.stack);
-            });
+        setInterval(() => this.doWatching(), 60 * 1000);
     }
 
     private doWatching() {

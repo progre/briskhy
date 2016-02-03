@@ -20,7 +20,12 @@ async function main() {
             onTick: () => irc.post(x.message),
             start: true
         }));
-    let watcher = new JiraWatcher();
+    let watcher: JiraWatcher;
+    try {
+        watcher = await JiraWatcher.new();
+    } catch (e) {
+        irc.post("Failed to start watching the JIRA. Please check enviroments.");
+    }
     watcher.on("update", (list: Ticket[]) => {
         list.forEach(ticket => {
             console.log(ticket);
