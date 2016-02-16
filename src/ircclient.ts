@@ -18,7 +18,6 @@ export default class IrcClient {
     }
 
     post(message: string) {
-       console.log("post to", process.env.npm_package_config_irc_channel, message);
        this.bot.say(process.env.npm_package_config_irc_channel, message);
     }
 }
