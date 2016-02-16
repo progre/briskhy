@@ -5,9 +5,9 @@ import {format} from "util";
 const promisify: (func: Function) => (...args: any[]) => Promise<any> = require("native-promisify");
 import {CronJob} from "cron";
 import IrcClient from "./ircclient";
-import JiraWatcher from "./jirawatcher";
-import Ticket from "./ticket";
-import * as jirautils from "./jirautils";
+import JiraWatcher from "./jira/watcher";
+import Ticket from "./jira/ticket";
+import * as jirautils from "./jira/utils";
 
 async function main() {
     let irc = new IrcClient();
@@ -25,6 +25,7 @@ async function main() {
         watcher = await JiraWatcher.new();
     } catch (e) {
         irc.post("Failed to start watching the JIRA. Please check enviroments.");
+        return;
     }
     watcher.on("update", (list: Ticket[]) => {
         list.forEach(ticket => {

@@ -1,5 +1,5 @@
 import * as events from "events";
-import * as jirautils from "./jirautils";
+import * as jirautils from "./utils";
 
 export default class JiraWatcher extends events.EventEmitter {
     private currentSprintState: string = null;
