@@ -4,19 +4,19 @@ import * as jirautils from "./utils";
 export default class Watcher extends events.EventEmitter {
     private currentSprintState: string = null;
 
-    static async new() {
-        let rss = await jirautils.getRss(1);
-        let result = await jirautils.parseFeed(rss);
-        return new this(result[0].updated);
+    static async new(config: any) {
+        let rss = await jirautils.getRss(config.url, config.project, 1);
+        let result = jirautils.parseFeed(rss);
+        return new this(config, result[0].updated);
     }
 
-    constructor(private lastUpdated: string) {
+    constructor(private config: any, private lastUpdated: string) {
         super();
         setInterval(() => this.doWatching(), 60 * 1000);
     }
 
     private doWatching() {
-        jirautils.getRss(10)
+        jirautils.getRss(this.config.url, this.config.project, 10)
             .then(jirautils.parseFeed)
             .then(result => {
                 console.log(result.length + "件中");
@@ -27,7 +27,7 @@ export default class Watcher extends events.EventEmitter {
             .catch(e => {
                 console.error(e.stack);
             });
-        jirautils.getSprintInfo()
+        jirautils.getSprintInfo(this.config.url, this.config.project)
             .then(x => {
                 let currentSprint = x.sprints[0];
                 let prevState = this.currentSprintState;

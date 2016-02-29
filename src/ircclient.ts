@@ -3,11 +3,15 @@ const irc = require("irc");
 export default class IrcClient {
     private bot: any;
 
+    constructor(
+        private config: any) {
+    }
+
     connect() {
         return new Promise((resolve, reject) => {
-            this.bot = new irc.Client(process.env.npm_package_config_irc_host, process.env.npm_package_config_irc_name, {
+            this.bot = new irc.Client(this.config.host, this.config.name, {
                 autoConnect: false,
-                channels: [process.env.npm_package_config_irc_channel],
+                channels: [this.config.channel],
                 debug: true
             });
             this.bot.addListener("error", (m: any) => {
@@ -18,6 +22,6 @@ export default class IrcClient {
     }
 
     post(message: string) {
-       this.bot.say(process.env.npm_package_config_irc_channel, message);
+        this.bot.say(this.config.channel, message);
     }
 }

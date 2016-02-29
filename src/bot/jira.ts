@@ -4,10 +4,10 @@ import Watcher from "./jira/watcher";
 import Ticket from "./jira/ticket";
 import * as jirautils from "./jira/utils";
 
-export async function wakeup(irc: IrcClient) {
+export async function wakeup(config: any, irc: IrcClient) {
     let watcher: Watcher;
     try {
-        watcher = await Watcher.new();
+        watcher = await Watcher.new(config);
     } catch (e) {
         irc.post("Failed to start watching the JIRA. Please check enviroments.");
         return;
@@ -20,17 +20,17 @@ export async function wakeup(irc: IrcClient) {
         list.filter(ticket => ticket.categoryTerm === "created")
             .forEach(ticket => {
                 console.log("created: " + ticket.title);
-                setTimeout(() => notifyCreatedTicket(irc, ticket), 60 * 1000);
+                setTimeout(() => notifyCreatedTicket(config.url, config.messages, irc, ticket), 60 * 1000);
             });
         list.filter(ticket => ticket.categoryTerm === "resolved")
             .forEach(ticket => {
-                jirautils.getTicketInfo(ticket.title)
+                jirautils.getTicketInfo(config.url, ticket.title)
                     .then(info => {
                         let name = info.username;
                         if (name === "-1") {
                             name = "all";
                         }
-                        let message = process.env.npm_package_config_message_resolved;
+                        let message = config.messages.resolved;
                         if (!!message) {
                             irc.post(format(message, name, ticket.title));
                         }
@@ -38,13 +38,13 @@ export async function wakeup(irc: IrcClient) {
             });
         list.filter(ticket => ticket.categoryTerm === "closed")
             .forEach(ticket => {
-                jirautils.getTicketInfo(ticket.title)
+                jirautils.getTicketInfo(config.url, ticket.title)
                     .then(info => {
                         let name = info.username;
                         if (name === "-1") {
                             name = "all";
                         }
-                        let message = process.env.npm_package_config_message_closed;
+                        let message = config.messages.closed;
                         if (!!message) {
                             irc.post(format(message, name, ticket.title));
                         }
@@ -52,26 +52,26 @@ export async function wakeup(irc: IrcClient) {
             });
         list.filter(ticket => ticket.categoryTerm === "reopened")
             .forEach(ticket => {
-                let message = process.env.npm_package_config_message_reopened;
+                let message = config.messages.reopened;
                 if (!!message) {
                     irc.post(format(message, ticket.title));
                 }
             });
     });
     watcher.on("sprintstart", (name: string) => {
-        irc.post(format(process.env.npm_package_config_message_sprintStarted, name));
+        irc.post(format(config.messages.sprintStarted, name));
     });
     watcher.on("sprintclose", (name: string) => {
-        irc.post(format(process.env.npm_package_config_message_sprintClosed, name));
+        irc.post(format(config.messages.sprintClosed, name));
     });
 }
 
-function notifyCreatedTicket(irc: IrcClient, ticket: Ticket) {
-    return jirautils.getTicketInfo(ticket.title)
+function notifyCreatedTicket(url: string, messages: any, irc: IrcClient, ticket: Ticket) {
+    return jirautils.getTicketInfo(url, ticket.title)
         .then(info => {
             let numLinks = info.links.length;
             let inSprint = info.sprint;
-            let messageTemplate = process.env.npm_package_config_message_opened;
+            let messageTemplate = messages.opened;
             if (!messageTemplate) {
                 return;
             }
