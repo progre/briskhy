@@ -1,14 +1,15 @@
 import {format} from "util";
-import IrcClient from "./ircclient";
-import Watcher from "./jira/watcher";
-import Ticket from "./jira/ticket";
-import * as jirautils from "./jira/utils";
+import IrcClient from "../ircclient";
+import Watcher from "../jira/watcher";
+import Ticket from "../jira/ticket";
+import * as jirautils from "../jira/utils";
 
 export async function wakeup(config: any, irc: IrcClient) {
     let watcher: Watcher;
     try {
         watcher = await Watcher.new(config);
     } catch (e) {
+        console.error(e.stack);
         irc.post("Failed to start watching the JIRA. Please check enviroments.");
         return;
     }
