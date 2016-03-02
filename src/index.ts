@@ -1,4 +1,5 @@
-﻿/// <reference path="typings.d.ts"/>
+/// <reference path="typings.d.ts"/>
+/// <reference path="../typings/main.d.ts" />
 try { require("source-map-support").install(); } catch (e) { /* empty */ }
 const promisify: (func: Function) => (...args: any[]) => Promise<any> = require("native-promisify");
 import * as fs from "fs";
